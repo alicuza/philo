@@ -6,7 +6,7 @@
 /*   By: sancuta <sancuta@student.42vienna.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 12:37:20 by sancuta           #+#    #+#             */
-/*   Updated: 2026/08/23 20:40:19 by sancuta          ###   ########.fr       */
+/*   Updated: 2026/08/27 22:24:45 by sancuta          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,7 @@
  *	a primitive type.
  */
 
-// TODO: if i add error messages directly on return, the function can return a bool
-//       and the defines can be used for the error message string
-static int	are_invalid_args(t_ctx *c, int argc, char **argv)
+static bool	validate_and_init_args(t_ctx *c, int argc, char **argv)
 {
 	int		i;
 	int		arg_cnt;
@@ -31,22 +29,24 @@ static int	are_invalid_args(t_ctx *c, int argc, char **argv)
 	int64_t	tmp;
 
 	arg_cnt = argc - ARG_START_IDX;
+	errno = 0;
 	if (arg_cnt < MIN_ARG_CNT || arg_cnt > MAX_ARG_CNT)
-		return (INVALID_ARG_CNT);	// TODO: potentially error message here.
+		return (false);
 	i = -1;
 	while (++i < arg_cnt)
 	{
 		nbr_len = sig_digits_strlen(argv[i + ARG_START_IDX]);
 		if (nbr_len < 1 || nbr_len > 11)
-			return (INVALID_NMB);	// TODO: potentially error message here.
+			return (false);
 		tmp = (int64_t)ft_atol(argv[i + ARG_START_IDX]);
 		if (tmp <= 0 || tmp >= INT_MAX)
-			return (INVALID_RNG);	// TODO: potentially error message here.
+			return (false);
 		c->args[i] = (uint32_t)tmp;
 	}
 	if (arg_cnt != MAX_ARG_CNT)
 		c->args[NBR_MEALS] = 0;
-	return (VALID);
+	atomic_init(&c->ph_to_go, (int)c->args[NBR_PHILOS]);
+	return (true);
 }
 
 static bool	init_mutexes(t_ctx *c)
@@ -56,11 +56,11 @@ static bool	init_mutexes(t_ctx *c)
 	c->gate = (pthread_mutex_t *)malloc(c->args[NBR_PHILOS]
 			* sizeof(pthread_mutex_t));
 	if (!c->gate)
-		return (false);	// TODO: potentially error message here.
+		return (false);
 	c->fork = (pthread_mutex_t *)malloc(c->args[NBR_PHILOS]
 			* sizeof(pthread_mutex_t));
 	if (!c->fork)
-		return (false);	// TODO: potentially error message here.
+		return (false);
 	i = -1;
 	while (++i < c->args[NBR_PHILOS])
 	{
@@ -71,49 +71,61 @@ static bool	init_mutexes(t_ctx *c)
 	return (true);
 }
 
-static bool	init_philo_data_and_thread(t_ctx *c)
+static void	assign_data_to_philo(t_ctx *c, uint32_t i)
+{
+	atomic_init(&c->philo_data[i].last_meal_time_ms, 0);
+	if ((i % 2))
+
+	{
+		c->philo_data[i].fork_first = &c->fork[i];
+		c->philo_data[i].fork_second = &c->fork[(i + 1) % c->args[NBR_PHILOS]];
+	}
+	else
+	{
+		c->philo_data[i].fork_first = &c->fork[(i + 1) % c->args[NBR_PHILOS]];
+		c->philo_data[i].fork_second = &c->fork[i];
+	}
+	c->philo_data[i].gate = &c->gate[i];
+	c->philo_data[i].philo_idx = i;
+	c->philo_data[i].simulation_start_time = &c->simulation_start_time;
+	c->philo_data[i].print_gate = &c->print_gate;
+	c->philo_data[i].ph_to_go = &c->ph_to_go;
+	c->philo_data[i].args = &c->args;
+}
+
+static bool	init_and_start_philos(t_ctx *c)
 {
 	uint32_t	i;
+	t_routine	*r;
 
 	c->philo_data = (t_thread_data *)malloc(c->args[NBR_PHILOS]
 			* sizeof(t_thread_data));
 	if (!c->philo_data)
-		return (false);	// TODO: potentially error message here.
+		return (false);
 	memset(c->philo_data, 0, c->args[NBR_PHILOS] * sizeof(t_thread_data));
+	if (c->args[NBR_PHILOS] == 1)
+		r = routine_single_philo;
+	else
+		r = routine_multiple_philos;
 	i = -1;
 	while (++i < c->args[NBR_PHILOS])
 	{
-		c->philo_data[i].philo_idx = i;
-		c->philo_data[i].simulation_start_time = &c->simulation_start_time;
-		c->philo_data[i].last_meal_time = c->simulation_start_time;
-		c->philo_data[i].last_action_time = c->simulation_start_time;
-		c->philo_data[i].gate = &c->gate[i];
-		c->philo_data[i].print_gate = &c->print_gate;
-		c->philo_data[i].fork_left = &c->fork[i];
-		c->philo_data[i].fork_right = &c->fork[(i + 1) % c->args[NBR_PHILOS]];
+		assign_data_to_philo(c, i);
 		pthread_mutex_lock(c->philo_data[i].gate);
-		pthread_create(&c->philo_data[i].tid, NULL, routine, &c->philo_data[i]);
+		pthread_create(&c->philo_data[i].tid, NULL, r, &c->philo_data[i]);
 	}
 	return (true);
 }
 
-// TODO: consider putting the error messages and/or cleanup at the failure points, for more granular control
 void	init_context(t_ctx *c, int argc, char **argv)
 {
-	if (are_invalid_args(c, argc, argv))
-		exit(EXIT_FAILURE);	// TODO: add error message & cleanup
+	if (!validate_and_init_args(c, argc, argv))
+		philo_exit(c, "validate_and_init_args",
+			strerror(errno), EXIT_FAILURE);
 	if (!init_mutexes(c))
-		exit(EXIT_FAILURE);	// TODO: add error message & cleanup
-	if (!init_philo_data_and_thread(c))
-		exit(EXIT_FAILURE);	// TODO: add error message & cleanup
-}
-
-void	start_simulation(t_ctx *c)
-{
-	uint32_t	i;
-
-	gettimeofday(&c->simulation_start_time, NULL);
-	i = -1;
-	while (++i < c->args[NBR_PHILOS])
-		pthread_mutex_unlock(c->philo_data[i].gate);
+		philo_exit(c, "init_mutexes",
+			strerror(errno), EXIT_FAILURE);
+	if (!init_and_start_philos(c))
+		philo_exit(c, "init_and_start_philos",
+			strerror(errno), EXIT_FAILURE);
 }

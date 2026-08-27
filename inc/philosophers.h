@@ -6,7 +6,7 @@
 /*   By: sancuta <sancuta@student.42vienna.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 16:34:20 by sancuta           #+#    #+#             */
-/*   Updated: 2026/08/25 21:28:11 by sancuta          ###   ########.fr       */
+/*   Updated: 2026/08/27 22:14:12 by sancuta          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,35 +23,26 @@
 # include <limits.h>
 # include <stdint.h>
 # include <stdbool.h>
-
-/* ----- fork indices relative to each philosopher -------------------------- */
-# define F_LEFT 0
-# define F_RIGHT 1
+# include <stdatomic.h>
 
 /* ----- argument definitions ----------------------------------------------- */
-# define ARG_START_IDX 1
-# define MIN_ARG_CNT 4
-# define MAX_ARG_CNT 5
+# define ARG_START_IDX		1
+# define MIN_ARG_CNT		4
+# define MAX_ARG_CNT		5
 
 // TODO: consider whether these should be an enum
-# define NBR_PHILOS 0
-# define T_DIE 1
-# define T_EAT 2
-# define T_SLEEP 3
-# define NBR_MEALS 4
-
-/* ----- argument validation flags ------------------------------------------ */
-#define VALID 0
-#define INVALID_ARG_CNT 1
-#define INVALID_NMB 2
-#define INVALID_RNG 3
+# define NBR_PHILOS		0
+# define T_DIE			1
+# define T_EAT			2
+# define T_SLEEP		3
+# define NBR_MEALS		4
 
 /* ----- state change strings ----------------------------------------------- */
-#define FORK "has taken a fork"
-#define EAT "is eating"
-#define SLEEP "is sleeping"
-#define THINK "is thinking"
-#define DEAD "died"
+#define FORK	"has taken a fork"
+#define EAT		"is eating"
+#define SLEEP	"is sleeping"
+#define THINK	"is thinking"
+#define DEAD	"died"
 
 /*
  *	struct timeval
@@ -63,48 +54,61 @@
  */
 typedef struct timeval	t_timeval;
 
+typedef void	*(t_routine)(void *);
+
 typedef struct s_thread_data
 {
-	t_timeval		last_meal_time;
-	t_timeval		last_action_time;
+	atomic_int64_t	last_meal_time_ms;
+	atomic_int64_t	*ph_to_go;
 	t_timeval		*simulation_start_time;
-	uint32_t		philo_idx;
 	uint32_t		*args;
-	pthread_t		tid;
-	bool			dead;	// TODO: needs to be initialized somewhere
 	pthread_mutex_t	*gate;
 	pthread_mutex_t	*print_gate;
-	pthread_mutex_t	*fork_left;
-	pthread_mutex_t	*fork_right;
+	pthread_mutex_t	*fork_first;
+	pthread_mutex_t	*fork_second;
+	pthread_t		tid;
+	uint32_t		philo_idx;
+	uint32_t		meal_cnt;
 }	t_thread_data;
 
 typedef struct	s_ctx
 {
+	uint32_t		args[MAX_ARG_CNT];
+	t_timeval		sim_start_time;
+	t_thread_data	*philo_data;
 	pthread_mutex_t	*fork;
 	pthread_mutex_t	*gate;
-	t_thread_data	*philo_data;
 	pthread_mutex_t	print_gate;
-	t_timeval		simulation_start_time;	// TODO: does this need to be in ctx?
-	uint32_t		args[MAX_ARG_CNT];	// TODO: i might need to add this to the philo args, so i can decided if a philo is the last one or not
+	atomic_int64_t	ph_to_go;
 }	t_ctx;
 
-/* ----- string_utils.c ----------------------------------------------------- */
-size_t	sig_digits_strlen(const char *nbr);
-int		ft_isspace(int c);
-int		ft_issign(int c);
-int		ft_isdigit(int c);
-int		printf_mutex(t_thread_data *data, char *time_to_what);
+/* ----- validation_utils.c ------------------------------------------------- */
+size_t		sig_digits_strlen(const char *nbr);
+int64_t		ft_atol(const char *nbr);
 
 /* ----- init_simulation.c -------------------------------------------------- */
-void	init_context(t_ctx *c, int argc, char **argv);
-void	start_simulation(t_ctx *c);
+void		init_context(t_ctx *c, int argc, char **argv);
 
-/* ----- time_utils.c ------------------------------------------------------- */
-int64_t	get_time_in_ms(t_timeval *start, t_timeval *end);
+/* ----- philo_helpers.c ---------------------------------------------------- */
+bool		is_simulation_running(t_thread_data *data);
+int64_t		get_time_in_ms(t_timeval *start, t_timeval *end);
+size_t		ft_strlen(const char *s)
 
-/* ----- routine.c ---------------------------------------------------------- */
-void	*routine(void *arg);
+/* ----- routines.c --------------------------------------------------------- */
+void		*routine_single_philo(void *arg);
+void		*routine_multiple_philos(void *arg);
 
-/* ----- ft_atol.c ---------------------------------------------------------- */
-int64_t	ft_atol(const char *nbr);
+/* ----- print_helpers.c ---------------------------------------------------- */
+bool		init_print(t_thread_data *data, uint32_t *idx, int64_t *time);
+int			print_formatted(int64_t time, uint32_t idx, char *action);
+bool		print_action(t_thread_data *data, char *action);
+bool		print_eat(t_thread_data *data);
+void		ft_putstr_fd(char *c, int fd);
+
+/* ----- philo_destroy_mutexes.c -------------------------------------------- */
+void		philo_exit(t_ctx *c, char *name, char *message, int status);
+
+/* ----- exit_cleanup.c ----------------------------------------------------- */
+void		handle_status_msg(char *prefix, char *name, char *message, int status);
+void		philo_exit(t_ctx *c, char *name, char *message, int status);
 #endif
