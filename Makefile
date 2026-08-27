@@ -15,7 +15,7 @@ NAME       = philo
 
 # ---- compiler / linker --------------------------------------------------- #
 CC         = cc
-CFLAGS     = -Wall -Wextra -Werror -MMD -MP -g
+CFLAGS     = -Wall -Wextra -Werror -MMD -MP
 CPPFLAGS   = -I inc
 LDFLAGS    =
 LDLIBS     = -lpthread
@@ -25,13 +25,13 @@ RELEASE_DIR = build
 
 # ---- sources ------------------------------------------------------------- #
 SRCS        = \
-			philosophers.c \
+			main.c \
 			init_simulation.c \
-			philosophers.c \
-			routine.c \
-			string_utils.c \
-			time_utils.c \
-			ft_atol.c
+			routines.c \
+			validation_utils.c \
+			print_utils.c \
+			philo_helpers.c \
+			exit_cleanup.c
 
 RELEASE_OBJS = $(addprefix $(RELEASE_DIR)/, $(SRCS:.c=.o))
 
@@ -39,7 +39,7 @@ RELEASE_OBJS = $(addprefix $(RELEASE_DIR)/, $(SRCS:.c=.o))
 vpath %.c srcs
 
 # ---- build flags --------------------------------------------------------- #
-#RELEASE_FLAGS = -O2
+RELEASE_FLAGS = -O2
 
 # ---- targets ------------------------------------------------------------- #
 all: $(NAME)
@@ -48,7 +48,7 @@ $(NAME): $(RELEASE_OBJS)
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 # ---- object compilation -------------------------------------------------- #
-#$(RELEASE_DIR)/%.o: BUILD_FLAGS = $(RELEASE_FLAGS)
+$(RELEASE_DIR)/%.o: BUILD_FLAGS = $(RELEASE_FLAGS)
 
 $(RELEASE_DIR)/%.o: %.c
 	@mkdir -p $(@D)

@@ -6,7 +6,7 @@
 /*   By: sancuta <sancuta@student.42vienna.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 12:37:20 by sancuta           #+#    #+#             */
-/*   Updated: 2026/08/27 22:24:45 by sancuta          ###   ########.fr       */
+/*   Updated: 2026/08/27 23:02:13 by sancuta          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ static bool	validate_and_init_args(t_ctx *c, int argc, char **argv)
 	int64_t	tmp;
 
 	arg_cnt = argc - ARG_START_IDX;
-	errno = 0;
 	if (arg_cnt < MIN_ARG_CNT || arg_cnt > MAX_ARG_CNT)
 		return (false);
 	i = -1;
@@ -53,6 +52,7 @@ static bool	init_mutexes(t_ctx *c)
 {
 	uint32_t	i;
 
+	errno = 0;
 	c->gate = (pthread_mutex_t *)malloc(c->args[NBR_PHILOS]
 			* sizeof(pthread_mutex_t));
 	if (!c->gate)
@@ -74,8 +74,7 @@ static bool	init_mutexes(t_ctx *c)
 static void	assign_data_to_philo(t_ctx *c, uint32_t i)
 {
 	atomic_init(&c->philo_data[i].last_meal_time_ms, 0);
-	if ((i % 2))
-
+	if (i % 2)
 	{
 		c->philo_data[i].fork_first = &c->fork[i];
 		c->philo_data[i].fork_second = &c->fork[(i + 1) % c->args[NBR_PHILOS]];
@@ -87,10 +86,10 @@ static void	assign_data_to_philo(t_ctx *c, uint32_t i)
 	}
 	c->philo_data[i].gate = &c->gate[i];
 	c->philo_data[i].philo_idx = i;
-	c->philo_data[i].simulation_start_time = &c->simulation_start_time;
+	c->philo_data[i].sim_start_time = &c->sim_start_time;
 	c->philo_data[i].print_gate = &c->print_gate;
 	c->philo_data[i].ph_to_go = &c->ph_to_go;
-	c->philo_data[i].args = &c->args;
+	c->philo_data[i].args = c->args;
 }
 
 static bool	init_and_start_philos(t_ctx *c)
@@ -98,6 +97,7 @@ static bool	init_and_start_philos(t_ctx *c)
 	uint32_t	i;
 	t_routine	*r;
 
+	errno = 0;
 	c->philo_data = (t_thread_data *)malloc(c->args[NBR_PHILOS]
 			* sizeof(t_thread_data));
 	if (!c->philo_data)
@@ -121,7 +121,7 @@ void	init_context(t_ctx *c, int argc, char **argv)
 {
 	if (!validate_and_init_args(c, argc, argv))
 		philo_exit(c, "validate_and_init_args",
-			strerror(errno), EXIT_FAILURE);
+			"Expected 4-5 positive integers up to UINT_MAX", EXIT_FAILURE);
 	if (!init_mutexes(c))
 		philo_exit(c, "init_mutexes",
 			strerror(errno), EXIT_FAILURE);
