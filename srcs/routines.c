@@ -6,7 +6,7 @@
 /*   By: sancuta <sancuta@student.42vienna.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/23 17:05:15 by sancuta           #+#    #+#             */
-/*   Updated: 2026/08/27 22:31:20 by sancuta          ###   ########.fr       */
+/*   Updated: 2026/08/28 00:49:57 by sancuta          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,7 @@ static bool	philo_sleep_and_think(t_thread_data *data)
 	usleep(1000 * data->args[T_SLEEP]);
 	if (!print_action(data, THINK))
 		return (false);
+	usleep(20);
 	return (true);
 }
 

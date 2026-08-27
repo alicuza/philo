@@ -6,7 +6,7 @@
 /*   By: sancuta <sancuta@student.42vienna.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/25 20:59:56 by sancuta           #+#    #+#             */
-/*   Updated: 2026/08/27 23:02:59 by sancuta          ###   ########.fr       */
+/*   Updated: 2026/08/27 23:25:12 by sancuta          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,10 @@ static bool	init_print(t_thread_data *data, uint32_t *philo_print_idx,
 {
 	t_timeval	cur_time;
 
-	gettimeofday(&cur_time, NULL);
-	*cur_time_ms = get_time_in_ms(data->sim_start_time, &cur_time);
 	*philo_print_idx = data->philo_idx + 1;
 	pthread_mutex_lock(data->print_gate);
+	gettimeofday(&cur_time, NULL);
+	*cur_time_ms = get_time_in_ms(data->sim_start_time, &cur_time);
 	if (!is_simulation_running(data))
 	{
 		pthread_mutex_unlock(data->print_gate);
@@ -29,7 +29,7 @@ static bool	init_print(t_thread_data *data, uint32_t *philo_print_idx,
 	return (true);
 }
 
-int	print_formatted(int64_t time, uint32_t philo_print_idx, char *action)
+inline int	print_formatted(int64_t time, uint32_t philo_print_idx, char *action)
 {
 	int	res;
 

@@ -6,7 +6,7 @@
 /*   By: sancuta <sancuta@student.42vienna.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 14:01:47 by sancuta           #+#    #+#             */
-/*   Updated: 2026/08/27 22:59:56 by sancuta          ###   ########.fr       */
+/*   Updated: 2026/08/28 00:50:19 by sancuta          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ static bool	is_philo_dead(t_ctx *c, uint32_t idx, int64_t cur_time_ms)
 
 	last_eaten_ms = atomic_load_explicit(&c->philo_data[idx].last_meal_time_ms,
 			memory_order_relaxed);
-	if (cur_time_ms - last_eaten_ms < (int64_t)c->args[T_DIE])
+	if (cur_time_ms - last_eaten_ms < (int64_t)c->args[T_DIE] * 1000)
 		return (false);
 	pthread_mutex_lock(&c->print_gate);
 	print_formatted(cur_time_ms, idx + 1, DEAD);
@@ -53,7 +53,7 @@ static void	monitor_philos(t_ctx *c)
 			if (is_philo_dead(c, i, cur_time_ms))
 				return ;
 		}
-		usleep(1000);
+		usleep(100);
 	}
 }
 

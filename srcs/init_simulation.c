@@ -6,7 +6,7 @@
 /*   By: sancuta <sancuta@student.42vienna.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 12:37:20 by sancuta           #+#    #+#             */
-/*   Updated: 2026/08/27 23:02:13 by sancuta          ###   ########.fr       */
+/*   Updated: 2026/08/28 00:30:56 by sancuta          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ static bool	init_mutexes(t_ctx *c)
 static void	assign_data_to_philo(t_ctx *c, uint32_t i)
 {
 	atomic_init(&c->philo_data[i].last_meal_time_ms, 0);
-	if (i % 2)
+	if (!(i % 2))
 	{
 		c->philo_data[i].fork_first = &c->fork[i];
 		c->philo_data[i].fork_second = &c->fork[(i + 1) % c->args[NBR_PHILOS]];
