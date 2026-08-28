@@ -6,7 +6,7 @@
 /*   By: sancuta <sancuta@student.42vienna.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/22 12:37:20 by sancuta           #+#    #+#             */
-/*   Updated: 2026/08/28 00:30:56 by sancuta          ###   ########.fr       */
+/*   Updated: 2026/08/28 02:01:23 by sancuta          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,6 +119,7 @@ static bool	init_and_start_philos(t_ctx *c)
 
 void	init_context(t_ctx *c, int argc, char **argv)
 {
+	memset(c, 0, sizeof(t_ctx));
 	if (!validate_and_init_args(c, argc, argv))
 		philo_exit(c, "validate_and_init_args",
 			"Expected 4-5 positive integers up to UINT_MAX", EXIT_FAILURE);

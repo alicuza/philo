@@ -6,7 +6,7 @@
 /*   By: sancuta <sancuta@student.42vienna.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/27 19:12:33 by sancuta           #+#    #+#             */
-/*   Updated: 2026/08/27 21:59:05 by sancuta          ###   ########.fr       */
+/*   Updated: 2026/08/28 01:47:31 by sancuta          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,10 @@ static void	philo_destroy_mutexes(t_ctx *c)
 	i = -1;
 	while (++i < c->args[NBR_PHILOS])
 	{
-		pthread_mutex_destroy(&c->gate[i]);
-		pthread_mutex_destroy(&c->fork[i]);
+		if (c->gate)
+			pthread_mutex_destroy(&c->gate[i]);
+		if (c->fork)
+			pthread_mutex_destroy(&c->fork[i]);
 	}
 	pthread_mutex_destroy(&c->print_gate);
 }
