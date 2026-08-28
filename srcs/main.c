@@ -6,7 +6,7 @@
 /*   By: sancuta <sancuta@student.42vienna.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/21 14:01:47 by sancuta           #+#    #+#             */
-/*   Updated: 2026/08/28 02:00:03 by sancuta          ###   ########.fr       */
+/*   Updated: 2026/08/28 11:30:50 by sancuta          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ static void	monitor_philos(t_ctx *c)
 		{
 			if (is_philo_dead(c, i, cur_time_ms))
 				return ;
-		usleep(5);
+			usleep(5);
 		}
 	}
 }

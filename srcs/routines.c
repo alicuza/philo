@@ -6,7 +6,7 @@
 /*   By: sancuta <sancuta@student.42vienna.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/23 17:05:15 by sancuta           #+#    #+#             */
-/*   Updated: 2026/08/28 01:52:04 by sancuta          ###   ########.fr       */
+/*   Updated: 2026/08/28 11:26:04 by sancuta          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,9 +77,10 @@ void	*routine_multiple_philos(void *arg)
 	data = (t_thread_data *)arg;
 	pthread_mutex_lock(data->gate);
 	pthread_mutex_unlock(data->gate);
+    if (data->philo_idx % 2)
+		usleep(data->args[T_EAT] * 480);
 	while (true)
 	{
-		usleep(100);
 		if (!philo_take_forks_and_eat(data))
 			break ;
 		if (data->args[NBR_MEALS] > 0
@@ -87,6 +88,7 @@ void	*routine_multiple_philos(void *arg)
 			atomic_fetch_sub_explicit(data->ph_to_go, 1, memory_order_relaxed);
 		if (!philo_sleep_and_think(data))
 			break ;
+		usleep(20);
 	}
 	return (NULL);
 }
