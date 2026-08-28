@@ -39,11 +39,11 @@
 # define NBR_MEALS		4
 
 /* ----- state change strings ----------------------------------------------- */
-#define FORK	"has taken a fork"
-#define EAT		"is eating"
-#define SLEEP	"is sleeping"
-#define THINK	"is thinking"
-#define DEAD	"died"
+# define FORK	"has taken a fork"
+# define EAT		"is eating"
+# define SLEEP	"is sleeping"
+# define THINK	"is thinking"
+# define DEAD	"died"
 
 /*
  *	struct timeval
@@ -63,37 +63,56 @@ typedef struct s_thread_data
 	atomic_int_least64_t	*ph_to_go;
 	t_timeval				*sim_start_time;
 	uint32_t				*args;
-	pthread_mutex_t			*gate;
+	atomic_bool				*start_flag;
 	pthread_mutex_t			*print_gate;
 	pthread_mutex_t			*fork_first;
 	pthread_mutex_t			*fork_second;
 	pthread_t				tid;
 	uint32_t				philo_idx;
 	uint32_t				meal_cnt;
+	uint32_t				time_to_think;
 }	t_thread_data;
 
-typedef struct	s_ctx
+typedef struct s_ctx
 {
 	uint32_t				args[MAX_ARG_CNT];
 	t_timeval				sim_start_time;
 	t_thread_data			*philo_data;
 	pthread_mutex_t			*fork;
-	pthread_mutex_t			*gate;
+	atomic_bool				start_flag;
 	pthread_mutex_t			print_gate;
 	atomic_int_least64_t	ph_to_go;
+	uint32_t				started;
+	uint32_t				forks_ready;
+	bool					print_gate_ready;
 }	t_ctx;
 
 /* ----- validation_utils.c ------------------------------------------------- */
 size_t		sig_digits_strlen(const char *nbr);
 int64_t		ft_atol(const char *nbr);
 
-/* ----- init_simulation.c -------------------------------------------------- */
+/* ----- init_context.c ----------------------------------------------------- */
 void		init_context(t_ctx *c, int argc, char **argv);
 
-/* ----- philo_helpers.c ---------------------------------------------------- */
+/* ----- init_alloc.c ------------------------------------------------------- */
+int			alloc_simulation(t_ctx *c);
+
+/* ----- init_sync.c -------------------------------------------------------- */
+int			init_mutexes(t_ctx *c);
+void		init_start_flag(t_ctx *c);
+void		wait_for_start(t_thread_data *data);
 bool		is_simulation_running(t_thread_data *data);
+
+/* ----- init_threads.c ----------------------------------------------------- */
+int			start_philos(t_ctx *c);
+
+/* ----- time_utils.c ------------------------------------------------------- */
+void		precise_sleep(int64_t time_ms);
 int64_t		get_time_in_ms(t_timeval *start, t_timeval *end);
+
+/* ----- string_utils.c ----------------------------------------------------- */
 size_t		ft_strlen(const char *s);
+void		ft_putstr_fd(char *c, int fd);
 
 /* ----- routines.c --------------------------------------------------------- */
 void		*routine_single_philo(void *arg);
@@ -103,7 +122,6 @@ void		*routine_multiple_philos(void *arg);
 int			print_formatted(int64_t time, uint32_t idx, char *action);
 bool		print_action(t_thread_data *data, char *action);
 bool		print_eat(t_thread_data *data);
-void		ft_putstr_fd(char *c, int fd);
 
 /* ----- exit_cleanup.c ----------------------------------------------------- */
 void		handle_status_msg(char *prefix, char *name, char *msg, int status);

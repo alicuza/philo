@@ -26,11 +26,15 @@ RELEASE_DIR = build
 # ---- sources ------------------------------------------------------------- #
 SRCS        = \
 			main.c \
-			init_simulation.c \
+			init_context.c \
+			init_alloc.c \
+			init_sync.c \
+			init_threads.c \
 			routines.c \
 			validation_utils.c \
 			print_utils.c \
-			philo_helpers.c \
+			time_utils.c \
+			string_utils.c \
 			exit_cleanup.c
 
 RELEASE_OBJS = $(addprefix $(RELEASE_DIR)/, $(SRCS:.c=.o))

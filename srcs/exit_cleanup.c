@@ -12,25 +12,30 @@
 
 #include "philosophers.h"
 
+static void	philo_stop_and_join(t_ctx *c)
+{
+	uint32_t	i;
+
+	atomic_store_explicit(&c->ph_to_go, 0, memory_order_relaxed);
+	atomic_store_explicit(&c->start_flag, true, memory_order_release);
+	i = -1;
+	while (++i < c->started)
+		pthread_join(c->philo_data[i].tid, NULL);
+}
+
 static void	philo_destroy_mutexes(t_ctx *c)
 {
 	uint32_t	i;
 
 	i = -1;
-	while (++i < c->args[NBR_PHILOS])
-	{
-		if (c->gate)
-			pthread_mutex_destroy(&c->gate[i]);
-		if (c->fork)
-			pthread_mutex_destroy(&c->fork[i]);
-	}
-	pthread_mutex_destroy(&c->print_gate);
+	while (++i < c->forks_ready)
+		pthread_mutex_destroy(&c->fork[i]);
+	if (c->print_gate_ready)
+		pthread_mutex_destroy(&c->print_gate);
 }
 
 static void	philo_free_allocations(t_ctx *c)
 {
-	free(c->gate);
-	c->gate = NULL;
 	free(c->fork);
 	c->fork = NULL;
 	free(c->philo_data);
@@ -60,6 +65,7 @@ void	handle_status_msg(char *prefix, char *name, char *message, int status)
 void	philo_exit(t_ctx *c, char *name, char *message, int status)
 {
 	handle_status_msg("philo", name, message, status);
+	philo_stop_and_join(c);
 	philo_destroy_mutexes(c);
 	philo_free_allocations(c);
 	exit(status);

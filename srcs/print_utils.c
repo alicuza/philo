@@ -6,7 +6,7 @@
 /*   By: sancuta <sancuta@student.42vienna.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/25 20:59:56 by sancuta           #+#    #+#             */
-/*   Updated: 2026/08/27 23:25:12 by sancuta          ###   ########.fr       */
+/*   Updated: 2026/08/28 17:36:27 by sancuta          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@ static bool	init_print(t_thread_data *data, uint32_t *philo_print_idx,
 	return (true);
 }
 
-inline int	print_formatted(int64_t time, uint32_t philo_print_idx, char *action)
+inline int	print_formatted(int64_t time, uint32_t philo_print_idx,
+			char *action)
 {
 	int	res;
 
@@ -62,9 +63,4 @@ bool	print_eat(t_thread_data *data)
 		memory_order_relaxed);
 	pthread_mutex_unlock(data->print_gate);
 	return (true);
-}
-
-void	ft_putstr_fd(char *c, int fd)
-{
-	write(fd, c, ft_strlen(c));
 }
