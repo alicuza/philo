@@ -21,46 +21,49 @@ void	*routine_single_philo(void *arg)
 
 	data = (t_thread_data *)arg;
 	wait_for_start(data);
-	pthread_mutex_lock(data->fork_first);
+	if (!guard_lock(data->ph_to_go, data->fork_first))
+		return (NULL);
 	if (!print_action(data, FORK))
 	{
 		pthread_mutex_unlock(data->fork_first);
 		return (NULL);
 	}
-	precise_sleep(data->args[T_DIE]);
+	sleep_until(data->sim_start_time, data->args[T_DIE]);
 	pthread_mutex_unlock(data->fork_first);
 	return (NULL);
 }
 
 static bool	philo_take_forks_and_eat(t_thread_data *data)
 {
-	pthread_mutex_lock(data->fork_first);
-	if (!print_action(data, FORK))
-	{
-		pthread_mutex_unlock(data->fork_first);
+	int64_t	meal_time_ms;
+
+	if (!take_both_forks(data))
 		return (false);
-	}
-	pthread_mutex_lock(data->fork_second);
 	if (!print_eat(data))
 	{
-		pthread_mutex_unlock(data->fork_second);
-		pthread_mutex_unlock(data->fork_first);
+		drop_forks(data);
 		return (false);
 	}
-	precise_sleep(data->args[T_EAT]);
-	pthread_mutex_unlock(data->fork_second);
-	pthread_mutex_unlock(data->fork_first);
+	meal_time_ms = atomic_load_explicit(&data->last_meal_time_ms,
+			memory_order_relaxed);
+	sleep_until(data->sim_start_time, meal_time_ms + data->args[T_EAT]);
+	drop_forks(data);
 	return (true);
 }
 
 static bool	philo_sleep_and_think(t_thread_data *data)
 {
+	int64_t	eat_end_ms;
+
+	eat_end_ms = atomic_load_explicit(&data->last_meal_time_ms,
+			memory_order_relaxed) + data->args[T_EAT];
 	if (!print_action(data, SLEEP))
 		return (false);
-	precise_sleep(data->args[T_SLEEP]);
+	sleep_until(data->sim_start_time, eat_end_ms + data->args[T_SLEEP]);
 	if (!print_action(data, THINK))
 		return (false);
-	precise_sleep(data->time_to_think);
+	sleep_until(data->sim_start_time,
+		eat_end_ms + data->args[T_SLEEP] + data->time_to_think);
 	return (true);
 }
 
@@ -88,7 +91,7 @@ void	*routine_multiple_philos(void *arg)
 	data->time_to_think = get_time_to_think(data->args);
 	wait_for_start(data);
 	if (data->philo_idx % 2)
-		precise_sleep(data->args[T_EAT]);
+		sleep_until(data->sim_start_time, data->args[T_EAT] / 2);
 	while (true)
 	{
 		if (!philo_take_forks_and_eat(data))

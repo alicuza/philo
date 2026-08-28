@@ -31,6 +31,7 @@ SRCS        = \
 			init_sync.c \
 			init_threads.c \
 			routines.c \
+			fork_utils.c \
 			validation_utils.c \
 			print_utils.c \
 			time_utils.c \

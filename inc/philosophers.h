@@ -107,12 +107,17 @@ bool		is_simulation_running(t_thread_data *data);
 int			start_philos(t_ctx *c);
 
 /* ----- time_utils.c ------------------------------------------------------- */
-void		precise_sleep(int64_t time_ms);
+void		sleep_until(t_timeval *start_time, int64_t deadline_ms);
 int64_t		get_time_in_ms(t_timeval *start, t_timeval *end);
 
 /* ----- string_utils.c ----------------------------------------------------- */
 size_t		ft_strlen(const char *s);
 void		ft_putstr_fd(char *c, int fd);
+
+/* ----- fork_utils.c ------------------------------------------------------- */
+bool		guard_lock(atomic_int_least64_t *ph_to_go, pthread_mutex_t *mutex);
+bool		take_both_forks(t_thread_data *data);
+void		drop_forks(t_thread_data *data);
 
 /* ----- routines.c --------------------------------------------------------- */
 void		*routine_single_philo(void *arg);

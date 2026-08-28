@@ -18,6 +18,29 @@ static void	start_simulation(t_ctx *c)
 	atomic_store_explicit(&c->start_flag, true, memory_order_release);
 }
 
+static bool	confirm_death(t_ctx *c, uint32_t idx)
+{
+	t_timeval	cur_time;
+	int64_t		cur_time_ms;
+	int64_t		last_eaten_ms;
+
+	if (!guard_lock(&c->ph_to_go, &c->print_gate))
+		return (false);
+	gettimeofday(&cur_time, NULL);
+	cur_time_ms = get_time_in_ms(&c->sim_start_time, &cur_time);
+	last_eaten_ms = atomic_load_explicit(&c->philo_data[idx].last_meal_time_ms,
+			memory_order_relaxed);
+	if (cur_time_ms - last_eaten_ms < (int64_t)c->args[T_DIE])
+	{
+		pthread_mutex_unlock(&c->print_gate);
+		return (false);
+	}
+	print_formatted(cur_time_ms, idx + 1, DEAD);
+	atomic_store_explicit(&c->ph_to_go, 0, memory_order_relaxed);
+	pthread_mutex_unlock(&c->print_gate);
+	return (true);
+}
+
 static bool	is_philo_dead(t_ctx *c, uint32_t idx, int64_t cur_time_ms)
 {
 	int64_t		last_eaten_ms;
@@ -26,11 +49,7 @@ static bool	is_philo_dead(t_ctx *c, uint32_t idx, int64_t cur_time_ms)
 			memory_order_relaxed);
 	if (cur_time_ms - last_eaten_ms < (int64_t)c->args[T_DIE])
 		return (false);
-	pthread_mutex_lock(&c->print_gate);
-	print_formatted(cur_time_ms, idx + 1, DEAD);
-	atomic_store_explicit(&c->ph_to_go, 0, memory_order_relaxed);
-	pthread_mutex_unlock(&c->print_gate);
-	return (true);
+	return (confirm_death(c, idx));
 }
 
 static void	monitor_philos(t_ctx *c)

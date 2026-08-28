@@ -18,7 +18,8 @@ static bool	init_print(t_thread_data *data, uint32_t *philo_print_idx,
 	t_timeval	cur_time;
 
 	*philo_print_idx = data->philo_idx + 1;
-	pthread_mutex_lock(data->print_gate);
+	if (!guard_lock(data->ph_to_go, data->print_gate))
+		return (false);
 	gettimeofday(&cur_time, NULL);
 	*cur_time_ms = get_time_in_ms(data->sim_start_time, &cur_time);
 	if (!is_simulation_running(data))
@@ -52,15 +53,19 @@ bool	print_action(t_thread_data *data, char *action)
 
 bool	print_eat(t_thread_data *data)
 {
-	int64_t		cur_time_ms;
+	int64_t		meal_time_ms;
+	int64_t		print_time_ms;
 	uint32_t	philo_print_idx;
+	t_timeval	cur_time;
 
-	if (!init_print(data, &philo_print_idx, &cur_time_ms))
-		return (false);
-	(void)print_formatted(cur_time_ms, philo_print_idx, FORK);
-	(void)print_formatted(cur_time_ms, philo_print_idx, EAT);
-	atomic_store_explicit(&data->last_meal_time_ms, cur_time_ms,
+	gettimeofday(&cur_time, NULL);
+	meal_time_ms = get_time_in_ms(data->sim_start_time, &cur_time);
+	atomic_store_explicit(&data->last_meal_time_ms, meal_time_ms,
 		memory_order_relaxed);
+	if (!init_print(data, &philo_print_idx, &print_time_ms))
+		return (false);
+	(void)print_formatted(print_time_ms, philo_print_idx, FORK);
+	(void)print_formatted(print_time_ms, philo_print_idx, EAT);
 	pthread_mutex_unlock(data->print_gate);
 	return (true);
 }

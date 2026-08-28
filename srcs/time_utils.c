@@ -12,18 +12,23 @@
 
 #include "philosophers.h"
 
-void	precise_sleep(int64_t time_ms)
+void	sleep_until(t_timeval *start_time, int64_t deadline_ms)
 {
-	t_timeval	start_time;
 	t_timeval	cur_time;
+	int64_t		remaining_ms;
 
-	gettimeofday(&start_time, NULL);
 	while (true)
 	{
 		gettimeofday(&cur_time, NULL);
-		if (get_time_in_ms(&start_time, &cur_time) >= time_ms)
+		remaining_ms = deadline_ms - get_time_in_ms(start_time, &cur_time);
+		if (remaining_ms <= 0)
 			return ;
-		usleep(200);
+		if (remaining_ms > 500)
+			usleep(400000);
+		else if (remaining_ms > 5)
+			usleep((remaining_ms - 5) * 1000);
+		else
+			usleep(50);
 	}
 }
 
