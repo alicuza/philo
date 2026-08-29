@@ -45,6 +45,12 @@
 # define THINK	"is thinking"
 # define DEAD	"died"
 
+/* ----- error messages ----------------------------------------------------- */
+# define E_ARGS		"Expected 4-5 positive integers up to UINT_MAX"
+# define E_ALLOC	"Cannot allocate memory"
+# define E_MUTEX	"Could not initialise a mutex"
+# define E_THREAD	"Could not create a thread"
+
 /*
  *	struct timeval
  *	{
@@ -92,7 +98,7 @@ size_t		sig_digits_strlen(const char *nbr);
 int64_t		ft_atol(const char *nbr);
 
 /* ----- init_context.c ----------------------------------------------------- */
-void		init_context(t_ctx *c, int argc, char **argv);
+int			init_context(t_ctx *c, int argc, char **argv);
 
 /* ----- init_alloc.c ------------------------------------------------------- */
 int			alloc_simulation(t_ctx *c);
@@ -130,5 +136,5 @@ bool		print_eat(t_thread_data *data);
 
 /* ----- exit_cleanup.c ----------------------------------------------------- */
 void		handle_status_msg(char *prefix, char *name, char *msg, int status);
-void		philo_exit(t_ctx *c, char *name, char *msg, int status);
+int			philo_exit(t_ctx *c, char *name, char *msg, int status);
 #endif

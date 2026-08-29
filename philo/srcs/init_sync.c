@@ -14,16 +14,14 @@
 
 int	init_mutexes(t_ctx *c)
 {
-	uint32_t	i;
-	int			err;
+	int	err;
 
-	i = -1;
-	while (++i < c->args[NBR_PHILOS])
+	c->forks_ready = -1;
+	while (++c->forks_ready < c->args[NBR_PHILOS])
 	{
-		err = pthread_mutex_init(&c->fork[i], NULL);
+		err = pthread_mutex_init(&c->fork[c->forks_ready], NULL);
 		if (err)
 			return (err);
-		c->forks_ready = i + 1;
 	}
 	err = pthread_mutex_init(&c->print_gate, NULL);
 	if (err)

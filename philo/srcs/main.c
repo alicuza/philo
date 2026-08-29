@@ -75,9 +75,12 @@ static void	monitor_philos(t_ctx *c)
 int	main(int argc, char **argv)
 {
 	t_ctx	c;
+	int		status;
 
-	init_context(&c, argc, argv);
+	status = init_context(&c, argc, argv);
+	if (status != EXIT_SUCCESS)
+		return (status);
 	start_simulation(&c);
 	monitor_philos(&c);
-	philo_exit(&c, NULL, NULL, EXIT_SUCCESS);
+	return (philo_exit(&c, NULL, NULL, EXIT_SUCCESS));
 }

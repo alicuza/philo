@@ -39,22 +39,17 @@ static bool	validate_and_init_args(t_ctx *c, int argc, char **argv)
 	return (true);
 }
 
-void	init_context(t_ctx *c, int argc, char **argv)
+int	init_context(t_ctx *c, int argc, char **argv)
 {
-	int	err;
-
 	memset(c, 0, sizeof(t_ctx));
 	if (!validate_and_init_args(c, argc, argv))
-		philo_exit(c, "validate_args",
-			"Expected 4-5 positive integers up to UINT_MAX", EXIT_FAILURE);
-	err = alloc_simulation(c);
-	if (err)
-		philo_exit(c, "alloc_simulation", strerror(err), EXIT_FAILURE);
-	err = init_mutexes(c);
-	if (err)
-		philo_exit(c, "init_mutexes", strerror(err), EXIT_FAILURE);
+		return (philo_exit(c, "validate_args", E_ARGS, EXIT_FAILURE));
+	if (alloc_simulation(c))
+		return (philo_exit(c, "alloc_simulation", E_ALLOC, EXIT_FAILURE));
+	if (init_mutexes(c))
+		return (philo_exit(c, "init_mutexes", E_MUTEX, EXIT_FAILURE));
 	init_start_flag(c);
-	err = start_philos(c);
-	if (err)
-		philo_exit(c, "start_philos", strerror(err), EXIT_FAILURE);
+	if (start_philos(c))
+		return (philo_exit(c, "start_philos", E_THREAD, EXIT_FAILURE));
+	return (EXIT_SUCCESS);
 }

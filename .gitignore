@@ -1,9 +1,8 @@
-/log
-/build
+/philo/log
+/philo/build
 /notes/literature
 /notes/plan
 /notes/assignment
-philo
-*.out
-42-philosophers-tester/
-42-philosophers-tester/
+/philo/*.out
+/philo/philo
+/philo/42-philosophers-tester/

@@ -62,11 +62,11 @@ void	handle_status_msg(char *prefix, char *name, char *message, int status)
 	}
 }
 
-void	philo_exit(t_ctx *c, char *name, char *message, int status)
+int	philo_exit(t_ctx *c, char *name, char *message, int status)
 {
 	handle_status_msg("philo", name, message, status);
 	philo_stop_and_join(c);
 	philo_destroy_mutexes(c);
 	philo_free_allocations(c);
-	exit(status);
+	return (status);
 }
