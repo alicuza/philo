@@ -6,7 +6,7 @@
 /*   By: sancuta <sancuta@student.42vienna.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/28 17:37:55 by sancuta           #+#    #+#             */
-/*   Updated: 2026/08/28 17:39:18 by sancuta          ###   ########.fr       */
+/*   Updated: 2026/08/31 23:04:06 by sancuta          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 static void	assign_data_to_philo(t_ctx *c, uint32_t i)
 {
 	atomic_init(&c->philo_data[i].last_meal_time_ms, 0);
-	if (!(i % 2))
+	if (i % 2)
 	{
 		c->philo_data[i].fork_first = &c->fork[i];
 		c->philo_data[i].fork_second = &c->fork[(i + 1) % c->args[NBR_PHILOS]];

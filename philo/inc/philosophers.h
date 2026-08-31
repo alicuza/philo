@@ -6,7 +6,7 @@
 /*   By: sancuta <sancuta@student.42vienna.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 16:34:20 by sancuta           #+#    #+#             */
-/*   Updated: 2026/08/27 22:50:13 by sancuta          ###   ########.fr       */
+/*   Updated: 2026/08/31 22:06:03 by sancuta          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@
 
 /* ----- state change strings ----------------------------------------------- */
 # define FORK	"has taken a fork"
-# define EAT		"is eating"
+# define EAT	"is eating"
 # define SLEEP	"is sleeping"
 # define THINK	"is thinking"
 # define DEAD	"died"
@@ -123,7 +123,6 @@ void		ft_putstr_fd(char *c, int fd);
 /* ----- fork_utils.c ------------------------------------------------------- */
 bool		guard_lock(atomic_int_least64_t *ph_to_go, pthread_mutex_t *mutex);
 bool		take_both_forks(t_thread_data *data);
-void		drop_forks(t_thread_data *data);
 
 /* ----- routines.c --------------------------------------------------------- */
 void		*routine_single_philo(void *arg);

@@ -6,7 +6,7 @@
 /*   By: sancuta <sancuta@student.42vienna.com>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/29 01:30:26 by sancuta           #+#    #+#             */
-/*   Updated: 2026/08/29 01:30:28 by sancuta          ###   ########.fr       */
+/*   Updated: 2026/08/31 22:05:24 by sancuta          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,4 @@ bool	take_both_forks(t_thread_data *data)
 		return (false);
 	}
 	return (true);
-}
-
-void	drop_forks(t_thread_data *data)
-{
-	pthread_mutex_unlock(data->fork_second);
-	pthread_mutex_unlock(data->fork_first);
 }
