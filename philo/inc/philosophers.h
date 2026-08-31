@@ -77,6 +77,7 @@ typedef struct s_thread_data
 	uint32_t				philo_idx;
 	uint32_t				meal_cnt;
 	uint32_t				time_to_think;
+	int64_t					last_print_time_ms;
 }	t_thread_data;
 
 typedef struct s_ctx

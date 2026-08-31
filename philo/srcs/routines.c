@@ -35,8 +35,6 @@ void	*routine_single_philo(void *arg)
 
 static bool	philo_take_forks_and_eat(t_thread_data *data)
 {
-	int64_t	meal_time_ms;
-
 	if (!take_both_forks(data))
 		return (false);
 	if (!print_eat(data))
@@ -44,9 +42,7 @@ static bool	philo_take_forks_and_eat(t_thread_data *data)
 		drop_forks(data);
 		return (false);
 	}
-	meal_time_ms = atomic_load_explicit(&data->last_meal_time_ms,
-			memory_order_relaxed);
-	sleep_until(data->sim_start_time, meal_time_ms + data->args[T_EAT]);
+	sleep_until(data->sim_start_time, data->last_print_time_ms + data->args[T_EAT]);
 	drop_forks(data);
 	return (true);
 }
@@ -55,8 +51,7 @@ static bool	philo_sleep_and_think(t_thread_data *data)
 {
 	int64_t	eat_end_ms;
 
-	eat_end_ms = atomic_load_explicit(&data->last_meal_time_ms,
-			memory_order_relaxed) + data->args[T_EAT];
+	eat_end_ms = data->last_print_time_ms + data->args[T_EAT];
 	if (!print_action(data, SLEEP))
 		return (false);
 	sleep_until(data->sim_start_time, eat_end_ms + data->args[T_SLEEP]);

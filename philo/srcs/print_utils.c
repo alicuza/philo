@@ -53,19 +53,17 @@ bool	print_action(t_thread_data *data, char *action)
 
 bool	print_eat(t_thread_data *data)
 {
-	int64_t		meal_time_ms;
-	int64_t		print_time_ms;
 	uint32_t	philo_print_idx;
 	t_timeval	cur_time;
 
 	gettimeofday(&cur_time, NULL);
-	meal_time_ms = get_time_in_ms(data->sim_start_time, &cur_time);
-	atomic_store_explicit(&data->last_meal_time_ms, meal_time_ms,
+	atomic_store_explicit(&data->last_meal_time_ms,
+		get_time_in_ms(data->sim_start_time, &cur_time),
 		memory_order_relaxed);
-	if (!init_print(data, &philo_print_idx, &print_time_ms))
+	if (!init_print(data, &philo_print_idx, &data->last_print_time_ms))
 		return (false);
-	(void)print_formatted(print_time_ms, philo_print_idx, FORK);
-	(void)print_formatted(print_time_ms, philo_print_idx, EAT);
+	(void)print_formatted(data->last_print_time_ms, philo_print_idx, FORK);
+	(void)print_formatted(data->last_print_time_ms, philo_print_idx, EAT);
 	pthread_mutex_unlock(data->print_gate);
 	return (true);
 }
